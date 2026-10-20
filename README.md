@@ -43,6 +43,7 @@ heart-disease-mlops/
 ├── outputs/                       EDA and training charts
 ├── screenshots/                   screenshots for the report
 ├── report/                        final report (Word)
+├── video/                         short video of the whole pipeline
 ├── Dockerfile
 ├── requirements.txt
 └── sample_input.json              example patient for the API
@@ -309,3 +310,4 @@ The API runs locally. URLs: Docker `http://localhost:8000`, Kubernetes `http://l
 
 - Screenshots: [`screenshots/`](screenshots/README.md)
 - Final report: `report/MLOps_Assignment1_Report.docx`
+- Pipeline video: `video/MLOps_Assignment1_pipeline_video.mp4`
