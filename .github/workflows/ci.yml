@@ -1,0 +1,99 @@
+# CI pipeline: lint -> unit tests -> model training
+# Runs on every push and pull request. If any step fails, the pipeline stops.
+name: ML Pipeline CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:   # allows a manual run from the Actions tab
+
+defaults:
+  run:
+    shell: bash        # bash with pipefail, so a failing command fails the step
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linters
+        run: pip install flake8==7.1.1 nbqa==1.9.0
+
+      - name: Lint API and tests
+        run: flake8 api test
+
+      - name: Lint notebook
+        run: nbqa flake8 heart_disease_pipeline.ipynb --extend-ignore=E302,E303,E305
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: |
+          mkdir -p logs
+          pytest -v --junitxml=logs/test-results.xml | tee logs/tests.log
+
+      - name: Upload test results and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: logs/
+
+  train:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      # Runs every cell: download, cleaning, EDA, training, MLflow, saving, inference.
+      # If any cell fails, this step fails.
+      - name: Run the ML pipeline notebook
+        run: |
+          mkdir -p logs
+          jupyter nbconvert --to notebook --execute heart_disease_pipeline.ipynb \
+            --output executed_pipeline.ipynb \
+            --ExecutePreprocessor.timeout=600 2>&1 | tee logs/pipeline.log
+
+      - name: Upload model, results and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-and-results
+          path: |
+            executed_pipeline.ipynb
+            models/
+            outputs/
+            mlruns/
+            data/cleaned/
+            logs/

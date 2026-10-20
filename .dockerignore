@@ -1,0 +1,12 @@
+.git
+venv
+.venv
+__pycache__
+mlruns
+data
+outputs
+logs
+test
+screenshots
+report
+*.ipynb
