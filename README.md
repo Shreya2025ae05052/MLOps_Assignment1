@@ -5,7 +5,7 @@ This project predicts the risk of heart disease from patient health data
 on Kubernetes and monitored with Prometheus and Grafana. A GitHub Actions
 pipeline lints, tests and trains the model on every push.
 
-**Code repository:** `<GitHub repository link>`
+**Code repository:** https://github.com/Shreya2025ae05052/MLOps_Assignment1
 
 ---
 
