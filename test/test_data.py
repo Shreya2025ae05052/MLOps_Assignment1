@@ -15,7 +15,7 @@ def test_clean_removes_duplicates(nb, raw_df):
 def test_target_is_binary(nb, raw_df):
     clean = nb["clean_data"](raw_df)
     assert "num" not in clean.columns
-    assert set(clean["target"].unique()) <= {0}
+    assert set(clean["target"].unique()) <= {0, 1}
 
 
 def test_all_columns_are_numeric(nb, raw_df):
